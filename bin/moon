@@ -2,13 +2,15 @@
 "use strict";
 
 var hexu = require("hexu");
-var pkg = require("../package.json");
-var load = require("../src/loader.js");
 var fs = require("fs");
 var path = require('path');
 var readline = require('readline');
 var ncp = require('ncp');
 var exec = require("child_process").execSync;
+
+var pkg = require("../package.json");
+var load = require("../src/loader.js");
+
 var command = process.argv.slice(2);
 
 const rl = readline.createInterface({
@@ -62,25 +64,38 @@ const mkdir = (pathToCreate, cb) => {
   }
 }
 
-var dive = function (dir, action) {
-  fs.readdir(dir, function (err, list) {
-    for(var i = 0; i < list.length; i++) {
-      var item = list[i];
-      fs.stat(path.join(dir, item), function(err, stat) {
-        if(stat && stat.isDirectory()) {
-          dive(dir, action);
+var walk = function(dir, done) {
+  var results = [];
+  fs.readdir(dir, function(err, list) {
+    if (err) return done(err);
+    var pending = list.length;
+    if (!pending) return done(null, results);
+    list.forEach(function(file) {
+      file = path.resolve(dir, file);
+      fs.stat(file, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+          walk(file, function(err, res) {
+            results = results.concat(res);
+            if (!--pending) done(null, results);
+          });
         } else {
-          action(null, item);
+          results.push(file);
+          if (!--pending) done(null, results);
         }
       });
-    }
+    });
   });
 };
 
 const info = (cb) => {
   var name = JSON.stringify(exec('git config --get user.name').toString().trim()).slice(1, -1);
+  var answers = {}
   ask("Author", name, function(answer) {
-    cb({author:answer});
+    answers.author = answer;
+    ask("Moon Version", "v0.1.3", function(answer2) {
+      answers.version = answer2
+      cb(answers);
+    });
   });
 }
 
@@ -103,6 +118,33 @@ const ask = (question, def, cb) => {
   });
 }
 
+var read = function(file, cb) {
+  fs.readFile(file, 'utf8', function(err, content) {
+    cb(file, content);
+  });
+}
+
+const compile = (name, opts, cb) => {
+  walk(path.join(process.cwd(), name), function(err, files) {
+    for(var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var count = -1;
+      read(file, function(fileName, content) {
+        var compiled = content.replace(/{{author}}/g, opts.author);
+        fs.writeFile(fileName, compiled, 'utf8', function(err) {
+          if(err) {
+            err(err);
+          }
+          count++;
+          if(files.length - 1 === count) {
+            cb();
+          }
+        });
+      });
+    }
+  });
+}
+
 const init = (name) => {
   info(function(opts) {
     var templateLoader = new load(hexu.blue("generating") + " template");
@@ -111,7 +153,7 @@ const init = (name) => {
     });
     ncp(__dirname + "/../template", process.cwd() + "/" + name, function (error) {
       if(error) console.log(error);
-      compileTemplate(name, opts, function() {
+      compile(name, opts, function() {
         rl.on('close', function() {
           console.log("\n\n");
           console.log("    " + hexu.blue("moon") + " generated app " + hexu.grey("'" + name + "'"));
@@ -124,18 +166,6 @@ const init = (name) => {
         templateLoader.done(function() {
           rl.close();
         });
-      });
-    });
-  });
-}
-
-const compileTemplate = (name, opts, cb) => {
-  dive(path.join(process.cwd(), name), function(err, file) {
-    fs.readFile(path.join(process.cwd(), name, file), 'utf8', function(err, data) {
-      var result = data.replace(/{{author}}/gi, opts.author);
-      fs.writeFile(path.join(process.cwd(), name, file), result, 'utf8', function(err) {
-          if (err) return console.log(err);
-          cb();
       });
     });
   });
