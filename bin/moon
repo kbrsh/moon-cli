@@ -131,6 +131,7 @@ const compile = (name, opts, cb) => {
       var count = -1;
       read(file, function(fileName, content) {
         var compiled = content.replace(/{{author}}/g, opts.author);
+        compiled = compiled.replace(/{{version}}/g, opts.version);
         fs.writeFile(fileName, compiled, 'utf8', function(err) {
           if(err) {
             err(err);
