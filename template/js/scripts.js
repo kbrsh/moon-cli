@@ -1,1 +1,10 @@
-// This is where your main application code goes
+/*=============================
+  Primary Application Code
+=============================*/
+
+var app = new Moon({
+  el: "#app",
+  data: {
+    title: "Moon"
+  }
+});
