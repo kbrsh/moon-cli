@@ -89,12 +89,15 @@ var walk = function(dir, done) {
 
 const info = (cb) => {
   var name = JSON.stringify(exec('git config --get user.name').toString().trim()).slice(1, -1);
-  var answers = {}
+  var answers = {};
   ask("Author", name, function(answer) {
     answers.author = answer;
-    ask("Moon Version", "v0.1.3", function(answer2) {
-      answers.version = answer2
-      cb(answers);
+    ask("Description", "A Moon App", function(answer2) {
+      answers.description = answer2;
+      ask("Moon Version", "v0.1.3", function(answer3) {
+        answers.version = answer3
+        cb(answers);
+      });
     });
   });
 }
@@ -132,6 +135,8 @@ const compile = (name, opts, cb) => {
       read(file, function(fileName, content) {
         var compiled = content.replace(/{{author}}/g, opts.author);
         compiled = compiled.replace(/{{version}}/g, opts.version);
+        compiled = compiled.replace(/{{description}}/g, opts.description);
+        compiled = compiled.replace(/{{name}}/g, name);
         fs.writeFile(fileName, compiled, 'utf8', function(err) {
           if(err) {
             err(err);
