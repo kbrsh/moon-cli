@@ -111,7 +111,6 @@ const init = (name) => {
           console.log("\n");
           console.log(hexu.grey("    To Start, run:"));
           console.log("      cd " + name);
-          console.log("      npm install");
           console.log(hexu.grey("    The app will be running at:"));
           console.log("      file://" + path.join(process.cwd(), name, "index.html"));
         })
