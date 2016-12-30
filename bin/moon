@@ -35,14 +35,21 @@ const help = () => {
   console.log("    Options: ");
   console.log("      -h, --help\tdisplays this help message");
   console.log("      -v, --version\tdisplays current Moon version");
+  exit();
 }
 
 const version = () => {
   console.log(pkg.version);
+  exit();
 }
 
 const err = (msg) => {
   console.log("  Moon " + hexu.red("ERR") + "    " + msg);
+  exit();
+}
+
+const exit = () => {
+  rl.close();
 }
 
 const mkdir = (pathToCreate, cb) => {
