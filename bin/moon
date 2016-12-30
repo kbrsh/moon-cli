@@ -1,0 +1,164 @@
+#!/usr/bin/env node
+"use strict";
+
+var hexu = require("hexu");
+var pkg = require("../package.json");
+var load = require("../src/loader.js");
+var fs = require("fs");
+var path = require('path');
+var readline = require('readline');
+var ncp = require('ncp');
+var exec = require("child_process").execSync;
+var command = process.argv.slice(2);
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+load.defineRl(rl);
+
+const space = (num) => {
+  return "\n".repeat(num);
+}
+
+const intro = () => {
+  console.log(hexu.blue("======= MOON =======") + space(1));
+}
+
+const help = () => {
+  console.log("    Usage: moon <command> [options]");
+  console.log(space(1));
+  console.log("    Commands: ");
+  console.log("      init\tgenerates a new project");
+  console.log(space(1));
+  console.log("    Options: ");
+  console.log("      -h, --help\tdisplays this help message");
+  console.log("      -v, --version\tdisplays current Moon version");
+}
+
+const version = () => {
+  console.log(pkg.version);
+}
+
+const err = (msg) => {
+  console.log("  Moon " + hexu.red("ERR") + "    " + msg);
+}
+
+const mkdir = (pathToCreate, cb) => {
+  try {
+    fs.mkdir(path.join(pathToCreate), function() {
+      cb();
+    });
+  } catch(err) {
+    if ( err.code !== 'EEXIST' ) throw err;
+  }
+}
+
+var dive = function (dir, action) {
+  fs.readdir(dir, function (err, list) {
+    for(var i = 0; i < list.length; i++) {
+      var item = list[i];
+      fs.stat(path.join(dir, item), function(err, stat) {
+        if(stat && stat.isDirectory()) {
+          dive(dir, action);
+        } else {
+          action(null, item);
+        }
+      });
+    }
+  });
+};
+
+const info = (cb) => {
+  var name = JSON.stringify(exec('git config --get user.name').toString().trim()).slice(1, -1);
+  ask("Author", name, function(answer) {
+    cb({author:answer});
+  });
+}
+
+const ask = (question, def, cb) => {
+  var prompt;
+  if(def) {
+    prompt = "    " + hexu.green("[?]") + " " + question + hexu.grey(" (" + def + ")  ");
+  } else {
+    prompt = "    " + hexu.green("[?]") + " " + question + "  ";
+  }
+  rl.question(prompt, (answer) => {
+    if(!answer) answer = def;
+    readline.moveCursor(rl, 0, -1);
+    rl.write("\n");
+    readline.moveCursor(rl, 0, -2);
+    rl.write("    " + hexu.green("[?]") + " " + question + "  " + hexu.cyan(answer) + "\n\n");
+    readline.moveCursor(rl, 0, -1);
+    rl.write(" ".repeat(prompt.length) + "\n");
+    cb(answer);
+  });
+}
+
+const init = (name) => {
+  info(function(opts) {
+    var templateLoader = new load(hexu.blue("generating") + " template");
+    mkdir(name, function() {
+
+    });
+    ncp(__dirname + "/../template", process.cwd() + "/" + name, function (error) {
+      if(error) console.log(error);
+      compileTemplate(name, opts, function() {
+        rl.on('close', function() {
+          console.log("\n\n");
+          console.log("    " + hexu.blue("moon") + " generated app " + hexu.grey("'" + name + "'"));
+          console.log("\n");
+          console.log(hexu.grey("    To Start, run:"));
+          console.log("      cd " + name);
+          console.log("      npm install");
+          console.log(hexu.grey("    The app will be running at:"));
+          console.log("      file://" + path.join(process.cwd(), name, "index.html"));
+        })
+        templateLoader.done(function() {
+          rl.close();
+        });
+      });
+    });
+  });
+}
+
+const compileTemplate = (name, opts, cb) => {
+  dive(path.join(process.cwd(), name), function(err, file) {
+    fs.readFile(path.join(process.cwd(), name, file), 'utf8', function(err, data) {
+      var result = data.replace(/{{author}}/gi, opts.author);
+      fs.writeFile(path.join(process.cwd(), name, file), result, 'utf8', function(err) {
+          if (err) return console.log(err);
+          cb();
+      });
+    });
+  });
+}
+
+intro();
+switch (command[0]) {
+  case undefined:
+    help();
+    break;
+  case "-h":
+    help();
+    break;
+  case "--help":
+    help();
+    break;
+  case "-v":
+    version();
+    break;
+  case "--version":
+    version();
+    break;
+  case "init":
+    if(command[1]) {
+      init(command[1]);
+    } else {
+      err("Please provide an app name");
+    }
+    break;
+  default:
+    err("Command Not Found");
+}

@@ -1,0 +1,23 @@
+{
+  "name": "moon-cli",
+  "version": "0.0.0",
+  "description": "Client for generating Moon applications.",
+  "main": "bin/moon",
+  "bin": {
+    "moon": "./bin/moon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KingPixil/moon.git"
+  },
+  "author": "Kabir Shah",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KingPixil/moon/issues"
+  },
+  "homepage": "https://github.com/KingPixil/moon#readme",
+  "dependencies": {
+    "hexu": "^1.0.0",
+    "ncp": "^2.0.0"
+  }
+}
