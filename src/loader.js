@@ -29,7 +29,7 @@ load.prototype.done = function(cb) {
     readline.moveCursor(rl, 0, -1);
     rl.write("    \x1b[32m" + "✓" + "\x1b[0m " + self.text + " \n");
     cb();
-  }, 500);
+  }, 1000);
 }
 
 module.exports = load;
