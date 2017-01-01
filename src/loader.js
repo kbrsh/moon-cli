@@ -31,7 +31,7 @@ load.prototype.done = function(cb) {
     cb();
   }, 1000);
 }
-
+// Expose loader
 module.exports = load;
 module.exports.defineRl = (instance) => {
   rl = instance;
