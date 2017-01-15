@@ -38,3 +38,7 @@ h1 {
   margin-right: auto;
   max-width: 300px;
 }
+
+[m-mask] {
+  display: none;
+}
