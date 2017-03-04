@@ -1,0 +1,29 @@
+{
+  "name": "{{name}}",
+  "version": "0.0.0",
+  "description": "{{description}}",
+  "scripts": {
+    "watch": "NODE_ENV='development' ./node_modules/.bin/watchify -vd -e js/scripts.js -o dist/build.js",
+    "serve": "./node_modules/.bin/http-server -o -c 1 -a localhost",
+    "dev": "./node_modules/.bin/npm-run-all --parallel watch serve",
+    "build": "NODE_ENV='production' node build/build.js"
+  },
+  "browserify": {
+    "transform": [
+      "moonify"
+    ]
+  },
+  "dependencies": {
+    "moonjs": "{{version}}"
+  },
+  "devDependencies": {
+    "moonify": "0.0.9",
+    "watchify": "3.9.0",
+    "browserify": "14.1.0",
+    "http-server": "0.9.0",
+    "npm-run-all": "^2.3.0",
+    "uglify-js": "latest",
+    "uglifyify": "3.0.4"
+  },
+  "author": "{{author}}"
+}
