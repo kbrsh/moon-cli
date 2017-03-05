@@ -18,6 +18,7 @@
     "moonjs": "{{version}}"
   },
   "devDependencies": {
+    "clean-css": "4.0.8",
     "moonify": "0.0.10",
     "watchify": "3.9.0",
     "browserify": "14.1.0",
