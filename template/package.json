@@ -5,7 +5,8 @@
   "scripts": {
     "watch": "NODE_ENV='development' ./node_modules/.bin/watchify -vd -e js/scripts.js -o dist/build.js",
     "serve": "./node_modules/.bin/http-server -o -c 1 -a localhost",
-    "dev": "./node_modules/.bin/npm-run-all --parallel watch serve",
+    "bundle-css": "node ./build/bundle-css.js",
+    "dev": "./node_modules/.bin/npm-run-all --parallel watch serve bundle-css",
     "build": "NODE_ENV='production' node build/build.js"
   },
   "browserify": {
