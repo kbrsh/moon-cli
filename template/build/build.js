@@ -12,3 +12,9 @@ bundler.transform({
   .plugin('moonify/plugins/extract-css.js')
   .bundle()
   .pipe(builtFile)
+
+bundler.on('bundle', function(bs) {
+  bs.on('end', function() {
+    require("./bundle-css.js");
+  });
+});

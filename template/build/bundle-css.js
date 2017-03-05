@@ -13,4 +13,4 @@ var previousCSS = "";
 if(fs.existsSync(builtCSSPath)) {
   previousCSS = fs.readFileSync(builtCSSPath);
 }
-fs.writeFileSync(builtCSSPath, previousCSS + css);
+fs.writeFileSync(builtCSSPath, css + previousCSS.toString());
