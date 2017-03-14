@@ -1,4 +1,4 @@
 module.exports = {
   env: process.env.NODE_ENV,
-  extractCSS: "dist/build.css"
+  extractCSS: "dist/build.min.css"
 }

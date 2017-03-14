@@ -1,9 +1,9 @@
-var browserify = require("browserify");
-var bundler = browserify('./js/scripts.js');
+const browserify = require("browserify");
+const bundler = browserify('./js/scripts.js');
 
-var fs = require('fs');
-var path = require('path');
-var builtFile = fs.createWriteStream(path.join(process.cwd(), 'dist/build.min.js'));;
+const fs = require('fs');
+const path = require('path');
+let builtFile = fs.createWriteStream(path.join(process.cwd(), 'dist/build.min.js'));;
 
 bundler.transform({
   sourcemap: false,

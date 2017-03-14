@@ -103,6 +103,7 @@ const info = (cb) => {
 }
 
 const ask = (question, def, cb) => {
+  // Utility to Ask Question
   var prompt;
   if(def) {
     prompt = "    " + hexu.green("[?]") + " " + question + hexu.grey(" (" + def + ")  ");
@@ -128,11 +129,13 @@ var read = function(file, cb) {
 }
 
 const compile = (name, opts, cb) => {
+  // Walk Files
   walk(path.join(process.cwd(), name), function(err, files) {
     for(var i = 0; i < files.length; i++) {
       var file = files[i];
       var count = -1;
       read(file, function(fileName, content) {
+        // Replace special mustache templates
         var compiled = content.replace(/{{author}}/g, opts.author);
         compiled = compiled.replace(/{{version}}/g, opts.version);
         compiled = compiled.replace(/{{description}}/g, opts.description);
@@ -152,24 +155,30 @@ const compile = (name, opts, cb) => {
 }
 
 const init = (name) => {
+  // Initialize App
+  // Get Info
   info(function(opts) {
+    // Create Loader
     var templateLoader = new load(hexu.blue("generating") + " template");
-    mkdir(name, function() {
-
-    });
-    ncp(__dirname + "/../template", process.cwd() + "/" + name, function (error) {
+    // Create directory
+    mkdir(name, function() {});
+    // Copy files from template
+    ncp(path.join(__dirname, "/../template"), path.join(process.cwd(), name), function (error) {
       if(error) console.log(error);
+      // Compile template
       compile(name, opts, function() {
+        // Success
         rl.on('close', function() {
-          console.log("\n\n");
-          console.log("    " + hexu.blue("moon") + " generated app " + hexu.grey("'" + name + "'"));
           console.log("\n");
-          console.log(hexu.grey("    To Start, run:"));
-          console.log("      cd " + name);
-          console.log("      npm install");
-          console.log("      npm run dev");
+          console.log(`${hexu.green("success")} generated ${hexu.grey(`'${name}'`)} ✨`);
+          console.log("\n")
+          console.log("To Start, Run:");
+          console.log(hexu.grey(`  cd ${name}
+  npm install
+  npm run dev`));
         });
         templateLoader.done(function() {
+          // Close Interface when Done
           rl.close();
         });
       });
