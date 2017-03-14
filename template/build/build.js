@@ -6,9 +6,12 @@ const path = require('path');
 let builtFile = fs.createWriteStream(path.join(process.cwd(), 'dist/build.min.js'));;
 
 bundler.transform({
-  sourcemap: false,
-  }, 'moonify')
-  .transform('uglifyify')
+    global: true,
+    ignore: [
+      '*.moon',
+      '*.css'
+    ]
+  }, 'uglifyify')
   .plugin('moonify/plugins/extract-css.js')
   .bundle()
   .pipe(builtFile)
