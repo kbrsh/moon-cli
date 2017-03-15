@@ -2,6 +2,7 @@
 
 var hexu = require("hexu");
 var Handlebars = require("handlebars");
+const download = require("download-git-repo");
 var async = require("async");
 var fs = require("fs");
 var path = require('path');
@@ -9,6 +10,8 @@ var readline = require('readline');
 var exec = require("child_process").execSync;
 var pkg = require("../package.json");
 var load = require("../src/loader.js");
+
+const cwd = process.cwd();
 
 var command = process.argv.slice(2);
 
@@ -54,42 +57,22 @@ const exit = () => {
   rl.close();
 }
 
-const mkdirp = (pathToCreate) => {
-  if(fs.existsSync(dir)){
-    return
+const mkdirp = (dir) => {
+  dir = path.dirname(dir);
+
+  if(fs.existsSync(dir)) {
+    return;
   }
-  try{
+
+  try {
     fs.mkdirSync(dir);
   } catch(err) {
-    if(err.code == 'ENOENT'){
+    if(err.code === 'ENOENT') {
       mkdirp(path.dirname(dir));
       mkdirp(dir);
     }
   }
 }
-
-var walk = function(dir, done) {
-  var results = [];
-  fs.readdir(dir, function(err, list) {
-    if (err) return done(err);
-    var pending = list.length;
-    if (!pending) return done(null, results);
-    list.forEach(function(file) {
-      file = path.resolve(dir, file);
-      fs.stat(file, function(err, stat) {
-        if (stat && stat.isDirectory()) {
-          walk(file, function(err, res) {
-            results = results.concat(res);
-            if (!--pending) done(null, results);
-          });
-        } else {
-          results.push(file);
-          if (!--pending) done(null, results);
-        }
-      });
-    });
-  });
-};
 
 const info = (cb) => {
   var name = JSON.stringify(exec('git config --get user.name').toString().trim()).slice(1, -1);
@@ -143,27 +126,8 @@ var read = function(file, cb) {
   });
 }
 
-const compile = (name, opts, cb) => {
-  // Walk Files
-  walk(path.join(process.cwd(), name), function(err, files) {
-    for(var i = 0; i < files.length; i++) {
-      var file = files[i];
-      var count = -1;
-      read(file, function(fileName, content) {
-        // Replace special mustache templates
-        var compiled = Handlebars.compile(content)(opts);
-        fs.writeFile(fileName, compiled, 'utf8', function(err) {
-          if(err) {
-            err(err);
-          }
-          count++;
-          if(files.length - 1 === count) {
-            cb();
-          }
-        });
-      });
-    }
-  });
+const compile = (file, opts) => {
+  return Handlebars.compile(fs.readFileSync(file).toString())(opts);
 }
 
 const init = (name) => {
@@ -172,28 +136,40 @@ const init = (name) => {
   info(function(opts) {
     // Create Loader
     var templateLoader = new load(hexu.blue("generating") + " template");
+
     // Create directory
-    mkdirp(name);
-    // Copy files from template
-    ncp(path.join(__dirname, "/../template"), path.join(process.cwd(), name), function (error) {
-      if(error) console.log(error);
-      // Compile template
-      opts.name = name;
-      compile(name, opts, function() {
-        // Success
-        rl.on('close', function() {
-          console.log("\n");
-          console.log(`${hexu.green("success")} generated ${hexu.grey(`'${name}'`)} ✨`);
-          console.log("\n")
-          console.log("To Start, Run:");
-          console.log(hexu.grey(`  cd ${name}
+    const projectDir = path.join(cwd, name);
+    mkdirp(projectDir);
+
+    // Download Template
+    const templatePath = path.join(__dirname, "/../template");
+    download("KingPixil/moon-template", templatePath, () => {
+      const configPath = path.join(templatePath, "config.json");
+      const config = JSON.parse(fs.readFileSync(configPath));
+      const files = config.files;
+
+      for(var i = 0; i < files.length; i++) {
+        let source = path.join(templatePath, files[i]);
+        let target = path.join(projectDir, files[i]);
+
+        mkdirp(target);
+
+        opts.name = name;
+        fs.writeFileSync(target, compile(source, opts));
+      }
+
+      rl.on('close', function() {
+        console.log("\n");
+        console.log(`${hexu.green("success")} generated ${hexu.grey(`'${name}'`)} ✨`);
+        console.log("\n")
+        console.log("To Start, Run:");
+        console.log(hexu.grey(`  cd ${name}
   npm install
   npm run dev`));
-        });
-        templateLoader.done(function() {
-          // Close Interface when Done
-          rl.close();
-        });
+      });
+      templateLoader.done(function() {
+        // Close Interface when Done
+        rl.close();
       });
     });
   });
