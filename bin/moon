@@ -74,6 +74,22 @@ const mkdirp = (dir) => {
   }
 }
 
+const del = (dir) => {
+  if(fs.lstatSync(dir).isFile()) {
+    fs.unlinkSync(dir);
+    return;
+  }
+  const files = fs.readdirSync(dir);
+  for(var i = 0; i < files.length; i++) {
+    let filePath = path.join(dir, files[i]);
+    if(fs.existsSync(filePath)) {
+      del(filePath);
+    } else {
+      fs.unlinkSync(filePath);
+    }
+  }
+}
+
 const info = (cb) => {
   var name = JSON.stringify(exec('git config --get user.name').toString().trim()).slice(1, -1);
   var answers = ask({
@@ -143,6 +159,9 @@ const init = (name) => {
 
     // Download Template
     const templatePath = path.join(__dirname, "/../template");
+    if(fs.existsSync(templatePath)) {
+      del(templatePath);
+    }
     download("KingPixil/moon-template", templatePath, () => {
       const configPath = path.join(templatePath, "config.json");
       const config = JSON.parse(fs.readFileSync(configPath));
