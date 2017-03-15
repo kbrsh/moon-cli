@@ -7,7 +7,7 @@ var path = require('path');
 var readline = require('readline');
 var ncp = require('ncp');
 var exec = require("child_process").execSync;
-
+var async = require("async");
 var pkg = require("../package.json");
 var load = require("../src/loader.js");
 
@@ -89,36 +89,47 @@ var walk = function(dir, done) {
 
 const info = (cb) => {
   var name = JSON.stringify(exec('git config --get user.name').toString().trim()).slice(1, -1);
-  var answers = {};
-  ask("Author", name, function(answer) {
-    answers.author = answer;
-    ask("Description", "A Moon App", function(answer2) {
-      answers.description = answer2;
-      ask("Moon Version", require("moonjs").version, function(answer3) {
-        answers.version = answer3
-        cb(answers);
-      });
-    });
+  var answers = ask({
+    "Author": {
+      def: name,
+      key: "author"
+    },
+    "Description": {
+      def: "A Moon App",
+      key: "description"
+    },
+    "Moon Version": {
+      def: require("moonjs").version,
+      key: "version"
+    }
+  }, function(answers) {
+    cb(answers);
   });
 }
 
-const ask = (question, def, cb) => {
+const ask = (questions, cb) => {
   // Utility to Ask Question
-  var prompt;
-  if(def) {
-    prompt = "    " + hexu.green("[?]") + " " + question + hexu.grey(" (" + def + ")  ");
-  } else {
-    prompt = "    " + hexu.green("[?]") + " " + question + "  ";
-  }
-  rl.question(prompt, (answer) => {
-    if(!answer) answer = def;
-    readline.moveCursor(rl, 0, -1);
-    rl.write("\n");
-    readline.moveCursor(rl, 0, -2);
-    rl.write("    " + hexu.green("[?]") + " " + question + "  " + hexu.cyan(answer) + "\n\n");
-    readline.moveCursor(rl, 0, -1);
-    rl.write(" ".repeat(prompt.length) + "\n");
-    cb(answer);
+  var prompt, answers = {};
+  async.eachSeries(Object.keys(questions), function(question, done) {
+    var def = questions[question].def;
+    if(def) {
+      prompt = "    " + hexu.green("[?]") + " " + question + hexu.grey(" (" + def + ")  ");
+    } else {
+      prompt = "    " + hexu.green("[?]") + " " + question + "  ";
+    }
+    rl.question(prompt, (answer) => {
+      if(!answer) answer = def;
+      readline.moveCursor(rl, 0, -1);
+      rl.write("\n");
+      readline.moveCursor(rl, 0, -2);
+      rl.write(`    ${hexu.green("[?]")} ${question}  ${hexu.cyan(answer)}\n\n`);
+      readline.moveCursor(rl, 0, -1);
+      rl.write(" ".repeat(prompt.length) + "\n");
+      answers[questions[question].key] = answer;
+      done(null);
+    });
+  }, function() {
+    cb(answers)
   });
 }
 

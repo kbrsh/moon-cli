@@ -17,8 +17,9 @@
   },
   "homepage": "https://github.com/KingPixil/moon#readme",
   "dependencies": {
+    "async": "^2.1.5",
     "hexu": "^1.0.0",
-    "ncp": "^2.0.0",
-    "moonjs": "latest"
+    "moonjs": "latest",
+    "ncp": "^2.0.0"
   }
 }
