@@ -8,6 +8,7 @@ var readline = require('readline');
 var ncp = require('ncp');
 var exec = require("child_process").execSync;
 var async = require("async");
+var Handlebars = require("handlebars")
 var pkg = require("../package.json");
 var load = require("../src/loader.js");
 
@@ -147,10 +148,7 @@ const compile = (name, opts, cb) => {
       var count = -1;
       read(file, function(fileName, content) {
         // Replace special mustache templates
-        var compiled = content.replace(/{{author}}/g, opts.author);
-        compiled = compiled.replace(/{{version}}/g, opts.version);
-        compiled = compiled.replace(/{{description}}/g, opts.description);
-        compiled = compiled.replace(/{{name}}/g, name);
+        var compiled = Handlebars.compile(content)(opts);
         fs.writeFile(fileName, compiled, 'utf8', function(err) {
           if(err) {
             err(err);
@@ -177,6 +175,7 @@ const init = (name) => {
     ncp(path.join(__dirname, "/../template"), path.join(process.cwd(), name), function (error) {
       if(error) console.log(error);
       // Compile template
+      opts.name = name;
       compile(name, opts, function() {
         // Success
         rl.on('close', function() {
