@@ -33,6 +33,7 @@ const help = () => {
   console.log(space(1));
   console.log("    Commands: ");
   console.log("      init\tgenerates a new project");
+  console.log("      help\tdisplays this help message");
   console.log(space(1));
   console.log("    Options: ");
   console.log("      -h, --help\tdisplays this help message");
@@ -197,13 +198,12 @@ const init = (name) => {
 
 intro();
 switch (command[0]) {
+  case "--help":
+  case "help":
   case undefined:
     help();
     break;
   case "-h":
-    help();
-    break;
-  case "--help":
     help();
     break;
   case "-v":
