@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 var hexu = require("hexu");
+var Handlebars = require("handlebars");
+var async = require("async");
 var fs = require("fs");
 var path = require('path');
 var readline = require('readline');
-var ncp = require('ncp');
 var exec = require("child_process").execSync;
-var async = require("async");
-var Handlebars = require("handlebars")
 var pkg = require("../package.json");
 var load = require("../src/loader.js");
 
@@ -55,13 +54,17 @@ const exit = () => {
   rl.close();
 }
 
-const mkdir = (pathToCreate, cb) => {
-  try {
-    fs.mkdir(path.join(pathToCreate), function() {
-      cb();
-    });
+const mkdirp = (pathToCreate) => {
+  if(fs.existsSync(dir)){
+    return
+  }
+  try{
+    fs.mkdirSync(dir);
   } catch(err) {
-    if ( err.code !== 'EEXIST' ) throw err;
+    if(err.code == 'ENOENT'){
+      mkdirp(path.dirname(dir));
+      mkdirp(dir);
+    }
   }
 }
 
@@ -170,7 +173,7 @@ const init = (name) => {
     // Create Loader
     var templateLoader = new load(hexu.blue("generating") + " template");
     // Create directory
-    mkdir(name, function() {});
+    mkdirp(name);
     // Copy files from template
     ncp(path.join(__dirname, "/../template"), path.join(process.cwd(), name), function (error) {
       if(error) console.log(error);
