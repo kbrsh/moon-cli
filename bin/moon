@@ -59,19 +59,14 @@ const exit = () => {
 
 const mkdirp = (dir) => {
   dir = path.dirname(dir);
-
-  if(fs.existsSync(dir)) {
-    return;
-  }
-
-  try {
-    fs.mkdirSync(dir);
-  } catch(err) {
-    if(err.code === 'ENOENT') {
-      mkdirp(path.dirname(dir));
-      mkdirp(dir);
-    }
-  }
+  dir.split('/')
+    .reduce((path, folder) => {
+      path += folder + '/';
+      if(!fs.existsSync(path)){
+        fs.mkdirSync(path);
+      }
+      return path;
+    }, '');
 }
 
 const del = (dir) => {
