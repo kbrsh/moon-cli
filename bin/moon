@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+"use strict";
+
 var hexu = require("hexu");
 var Handlebars = require("handlebars");
 const download = require("download-git-repo");
