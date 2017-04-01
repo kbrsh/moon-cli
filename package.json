@@ -1,6 +1,6 @@
 {
   "name": "moon-cli",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Client for generating Moon applications.",
   "main": "bin/moon",
   "bin": {
