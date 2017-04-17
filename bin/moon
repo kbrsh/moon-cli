@@ -59,16 +59,17 @@ const exit = () => {
   rl.close();
 }
 
-const mkdirp = (dir) => {
-  dir = path.dirname(dir);
-  dir.split('/')
-    .reduce((path, folder) => {
-      path += folder + '/';
-      if(!fs.existsSync(path)){
-        fs.mkdirSync(path);
-      }
-      return path;
-    }, '');
+const sep = path.sep;
+let mkdirp = (dir) => {
+  const parts = dir.split(sep);
+  let subdir = sep;
+
+  for(let i = 1; i < parts.length; i++) {
+    subdir += parts[i] + sep;
+    if(fs.existsSync(subdir) === false) {
+      fs.mkdirSync(subdir);
+    }
+  }
 }
 
 const del = (dir) => {
@@ -168,7 +169,7 @@ const init = (name) => {
         let source = path.join(templatePath, files[i]);
         let target = path.join(projectDir, files[i]);
 
-        mkdirp(target);
+        mkdirp(path.dirname(target));
 
         opts.name = name;
         fs.writeFileSync(target, compile(source, opts));
