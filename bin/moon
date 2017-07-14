@@ -100,7 +100,7 @@ const info = (cb) => {
       key: "description"
     },
     "Moon Version": {
-      def: require("moonjs").version,
+      def: exec("npm show moonjs version").toString().slice(0, -1),
       key: "version"
     }
   }, function(answers) {
