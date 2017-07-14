@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KingPixil/moon.git"
+    "url": "git+https://github.com/KingPixil/moon-cli.git"
   },
   "author": "Kabir Shah",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/KingPixil/moon/issues"
+    "url": "https://github.com/KingPixil/moon-cli/issues"
   },
-  "homepage": "https://github.com/KingPixil/moon#readme",
+  "homepage": "https://github.com/KingPixil/moon-cli#readme",
   "dependencies": {
     "async": "^2.1.5",
     "download-git-repo": "^0.2.1",
