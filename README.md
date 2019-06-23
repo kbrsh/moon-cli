@@ -15,7 +15,7 @@ $ npm install moon-cli -g
 Create your first project with:
 
 ```sh
-$ moon init <name>
+$ moon <name>
 ```
 
 `<name>` is the name of your application, and Moon will proceed to create the directory and install the template there.
