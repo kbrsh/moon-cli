@@ -1,5 +1,7 @@
 # Moon Cli
 
+## NOTE: This repo is outdated. The current source and documentation are available in [the Moon monorepo](https://github.com/kbrsh/moon/tree/master/packages/moon-cli).
+
 :sparkles: A CLI to scaffold Moon applications
 
 ### Installation
